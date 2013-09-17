@@ -5,6 +5,8 @@
 
 #include "learner.h"
 #include "baseline.h"
+#include "DecisionTree.h"
+
 #include "error.h"
 #include "rand.h"
 #include "filter.h"
@@ -131,7 +133,7 @@ SupervisedLearner* getLearner(string model, Rand& r)
 	else if (model.compare("neuralnet") == 0)
 		ThrowError("Sorry, ", model, " is not yet implemented");
 	else if (model.compare("DecisionTree") == 0)
-		ThrowError("Sorry, ", model, " is not yet implemented");
+		return new DecisionTree(r);
 	else if (model.compare("naivebayes") == 0)
 		ThrowError("Sorry, ", model, " is not yet implemented");
 	else if (model.compare("knn") == 0)
