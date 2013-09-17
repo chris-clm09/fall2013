@@ -1,0 +1,6 @@
+CS465-Security/Projects/.metadata
+CS465-Security/Projects/.metadata/*
+*.xmi
+.cproject
+.project
+.DS_Store
