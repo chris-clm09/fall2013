@@ -126,11 +126,11 @@ double getTime()
 
 SupervisedLearner* getLearner(string model, Rand& r)
 {
-	if (model.compare("baseline") == 0)
+	if (model.compare("BaselineLearner") == 0)
 		return new BaselineLearner(r);
 	else if (model.compare("neuralnet") == 0)
 		ThrowError("Sorry, ", model, " is not yet implemented");
-	else if (model.compare("decisiontree") == 0)
+	else if (model.compare("DecisionTree") == 0)
 		ThrowError("Sorry, ", model, " is not yet implemented");
 	else if (model.compare("naivebayes") == 0)
 		ThrowError("Sorry, ", model, " is not yet implemented");
