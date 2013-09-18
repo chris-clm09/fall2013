@@ -334,6 +334,11 @@ public:
          DecisionTreeNode *node = returnBestEntropySplitNode(indexsOfAttributesAvailable,
                                                              exampleSet,
                                                              labels);
+         if (node == NULL)
+         {
+            cout << "Holly Molly it was NULL\n";
+         }
+         
          //Remove selected attribute from list
          vector<unsigned int> newIndexsOfAttributesAvailable(indexsOfAttributesAvailable.size() - 1);
 
