@@ -92,30 +92,30 @@ class DecisionTree : public SupervisedLearner
 {
 private:
 	Rand& m_rand; // pseudo-random number generator (not actually used by the baseline learner)
-	vector<double> m_labelVec; // The label vector that this learner will always predict
-   DecisionTreeNode* dTree;
+	DecisionTreeNode* dTree;
    
 public:
    /************************************************************************
-    *
+    * Constructor
+    * Init pseudo-random number generator.
     ************************************************************************/
-	DecisionTree(Rand& r) : SupervisedLearner(), m_rand(r)
-	{
-	}
+	DecisionTree(Rand& r) : SupervisedLearner(), m_rand(r), dTree(NULL) { }
 
    /************************************************************************
-    *
+    * Destructor
     ************************************************************************/
-	virtual ~DecisionTree()
-	{
-	}
+	virtual ~DecisionTree() { freeDTree(); }
 
+   /************************************************************************
+	 * Free up the decision tree.
+    ************************************************************************/
+   void freeDTree() {if (dTree != NULL) delete dTree; dTree = NULL;}
+   
    /************************************************************************
 	 * Train the model to predict the labels
     ************************************************************************/
 	virtual void train(Matrix& features, Matrix& labels)
 	{
-      cout << "Labels Count : " << labels.valueCount(0) << endl;
 		// Check assumptions
 		if(features.rows() != labels.rows())
 			ThrowError("Expected the features and labels to have the same number of rows");
@@ -123,21 +123,16 @@ public:
 		// Shuffle the rows. (This won't really affect this learner, but with other
 		// learners it is a good idea to shuffle the rows before doing any training.)
 		features.shuffleRows(m_rand, &labels);
-
-		// Throw away any previous training
-		m_labelVec.clear();
-
       
+      freeDTree();
       
 		// Train it
-		for(size_t i = 0; i < labels.cols(); i++)
-		{
-			size_t values = labels.valueCount(i);
-			if(values == 0) // if the label is continuous...
-				m_labelVec.push_back(labels.columnMean(i));
-			else
-				m_labelVec.push_back(labels.mostCommonValue(i));
-		}
+      vector<unsigned int> availableAttributes;
+      for (int i = 0; i < features[0].size(); i++)
+         availableAttributes.push_back(i);
+      
+      dTree = induceTree(availableAttributes, features, labels);
+      
 	}
 
    /************************************************************************
@@ -336,9 +331,28 @@ public:
       }
       else if (exampleSet.rows() > 0)
       {
+         DecisionTreeNode *node = returnBestEntropySplitNode(indexsOfAttributesAvailable,
+                                                             exampleSet,
+                                                             labels);
+         //Remove selected attribute from list
+         vector<unsigned int> newIndexsOfAttributesAvailable(indexsOfAttributesAvailable.size() - 1);
+
+         for (int i = 0; i < indexsOfAttributesAvailable.size(); i++)
+            if (indexsOfAttributesAvailable[i] != node->indexOfPropertyChosen)
+               newIndexsOfAttributesAvailable.push_back(indexsOfAttributesAvailable[i]);
          
+         //Fill in Remainning Attribute Choices
+         for (int childIndex = 0; childIndex < node->children.size(); childIndex++)
+         {
+            DecisionTreeNode * child = induceTree(newIndexsOfAttributesAvailable,
+                                                  node->children[childIndex]->features,
+                                                  node->children[childIndex]->labels);
+            delete node->children[childIndex];
+            
+            node->children[childIndex] = child;
+         }
       }
-         
+      
       return returnNode;
    }
    
@@ -346,11 +360,8 @@ public:
 	 * Evaluate the features and predict the labels
     ************************************************************************/
 	virtual void predict(const std::vector<double>& features, std::vector<double>& labels)
-	{      
-		if(labels.size() != m_labelVec.size())
-			ThrowError("Unexpected number of label dims");
-		for(size_t i = 0; i < labels.size(); i++)
-			labels[i] = m_labelVec[i];
+	{
+      //TODO
 	}
 };
 
