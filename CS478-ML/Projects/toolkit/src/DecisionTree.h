@@ -165,15 +165,102 @@ public:
                                                          Matrix& exampleSet,
                                                          Matrix& labels)
    {
+      DecisionTreeNode *newNode     = new DecisionTreeNode(exampleSet, labels);
+      newNode->indexOfPropertyChosen = attributeIndex;
+      
       //Check if attribute is nominal
-      if (exampleSet.valueCount(attributeIndex))
+      unsigned int numAttributeChoices = exampleSet.valueCount(attributeIndex);
+      if (numAttributeChoices == 0)
       {// 0 == is Continuious
          
+         double splitPoint = exampleSet.columnMean(attributeIndex);
+         
+         Matrix newExampleSet(exampleSet);
+         Matrix newLabels(labels);
+
+         Matrix newExampleSet2(exampleSet);
+         Matrix newLabels2(labels);
+         
+         for (int r = 0; r < exampleSet.rows(); r++)
+         {
+            if (exampleSet[r][attributeIndex] < splitPoint)
+            {
+               newExampleSet.copyRow(exampleSet[r]);
+               newLabels.copyRow(labels[r]);
+            }
+            else
+            {
+               newExampleSet2.copyRow(exampleSet[r]);
+               newLabels2.copyRow(labels[r]);
+            }
+         }
+         
+         newNode->children.push_back(new DecisionTreeNode(newExampleSet, newLabels));
+         newNode->children.push_back(new DecisionTreeNode(newExampleSet2, newLabels2));
       }
       else
       {// 2, 3, 4, ... is Nominal
+         for (int c = 0; c < numAttributeChoices; c++)
+         {
+            Matrix newExampleSet(exampleSet);
+            Matrix newLabels(labels);
+            
+            for (int r = 0; r < exampleSet.rows(); r++)
+            {
+               if (exampleSet[r][attributeIndex] == c)
+               {
+                  newExampleSet.copyRow(exampleSet[r]);
+                  newLabels.copyRow(labels[r]);
+               }
+            }
+            
+            newNode->children.push_back(new DecisionTreeNode(newExampleSet, newLabels));
+         }
+      }
+      
+      return newNode;
+   }
+   
+   /************************************************************************
+    * Calc Knowledge Gained
+    ************************************************************************/
+   double infoGain(DecisionTreeNode* attributeSelectedNode)
+   {
+      //Calc Entropy
+      attributeSelectedNode->currentEntropy = entropy(attributeSelectedNode->features,
+                                                      attributeSelectedNode->labels);
+      for (int childIndex = 0; childIndex < attributeSelectedNode->children.size(); childIndex++)
+      {
+         (attributeSelectedNode->children[childIndex])->currentEntropy = entropy(
+                        (attributeSelectedNode->children[childIndex])->features,
+                        (attributeSelectedNode->children[childIndex])->labels);
          
       }
+      
+      //Calc Weigted Entropy of Children
+      double weightedChildrensEntropy = 0;
+      for (int childIndex = 0; childIndex < attributeSelectedNode->children.size(); childIndex++)
+      {
+         double weight = (attributeSelectedNode->children[childIndex])->features.rows() /
+                          attributeSelectedNode->features.rows();
+         
+         weightedChildrensEntropy += weight *
+                                     (attributeSelectedNode->children[childIndex])->currentEntropy;
+      }
+      
+      //return gain
+      return attributeSelectedNode->currentEntropy - weightedChildrensEntropy;
+   }
+
+   unsigned int max(double *options, int size)
+   {
+      unsigned int max = 0;
+
+      for (int i = 1; i < size; i++)
+         if (options[max] > options[i])
+            max = i;
+   
+      return max;
    }
    
    /************************************************************************
@@ -194,12 +281,25 @@ public:
       }
       
       //Calc Knowledge Gain
+      double *infoGainOfPossibilities = new double[possibilities.size()];
+
+      for (int i = 0; i < possibilities.size(); i++)
+         infoGainOfPossibilities[i] = infoGain(possibilities[i]);
       
       //Select Max Knowldege Gain
+      int iMax = max(infoGainOfPossibilities, possibilities.size());
       
       //Clean up possibilites
+      delete [] infoGainOfPossibilities;
+      
+      for (int i = 0; i < possibilities.size(); i++)
+      {
+         if (i != iMax)
+            delete possibilities[i];
+      }
       
       //Return bestSplit
+      return possibilities[iMax];
       
    }
    
@@ -240,14 +340,6 @@ public:
       }
          
       return returnNode;
-   }
-
-   /************************************************************************
-    * 
-    ************************************************************************/
-   double gain(Matrix& set, Matrix& labels, unsigned int propertySelectedIndex)
-   {
-      return 0;
    }
    
    /************************************************************************
