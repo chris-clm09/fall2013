@@ -38,12 +38,12 @@ using namespace std;
 /************************************************************************
  * Return the max index of the max value.
  ************************************************************************/
-unsigned int max(double *options, int size)
+unsigned int myIndexMax(double *options, int size)
 {
    unsigned int max = 0;
    
    for (int i = 1; i < size; i++)
-      if (options[max] > options[i])
+      if (options[max] < options[i])
          max = i;
    
    return max;
@@ -74,7 +74,7 @@ double entropy(Matrix& set, Matrix& labels)
    for (int i = 0; i < labels.valueCount(0); i++)
    {
       double proportion = numberInClassI(labels, i) / (double) labels.rows();
-      entropy -= proportion * log2(proportion);
+      entropy -= proportion * (proportion == 0 ? 0.0 : log2(proportion));
    }
    return entropy;
 }
@@ -90,7 +90,7 @@ double accuracy(Matrix& set, Matrix& labels)
    for (int i  = 0; i < labels.rows();        i++) { percents[ (unsigned int)labels[i][0] ] += 1; }
    for (int i  = 0; i < labels.valueCount(0); i++) { percents[i] /= (double)labels.rows(); }
    
-   int maxI = max(percents, labels.valueCount(0));
+   int maxI = myIndexMax(percents, labels.valueCount(0));
    double currentBestGuessAccuracy = percents[maxI];
    
    delete [] percents;
@@ -123,13 +123,38 @@ public:
    }
    
    DecisionTreeNode(int aIndexOfChosenClass)
-   :indexOfChosenClass(-1), indexOfPropertyChosen(-1), currentEntropy(0), currentAccuracy(0)
+   :indexOfChosenClass(aIndexOfChosenClass), indexOfPropertyChosen(-1), currentEntropy(0), currentAccuracy(0)
    {
-      indexOfChosenClass = aIndexOfChosenClass;
    }
    
    ~DecisionTreeNode() { for (int i = 0; i<children.size(); i++) { free(children[i]); } }
 
+   double predict(const std::vector<double>& features)
+   {
+      if (indexOfChosenClass != -1)
+      {
+         return indexOfChosenClass;
+      }
+      else
+      {
+         unsigned int numAttributeChoices = this->features.valueCount(indexOfPropertyChosen);
+         
+         if (numAttributeChoices == 0)// 0 == is Continuious
+         {
+            double splitPoint = this->features.columnMean(indexOfPropertyChosen);
+            
+            if (features[indexOfPropertyChosen] < splitPoint)
+               return children[0]->predict(features);
+            else
+               return children[1]->predict(features);
+         }
+         else if (children[features[indexOfPropertyChosen]] != NULL)
+            return children[features[indexOfPropertyChosen]]->predict(features);
+         else
+            return -1;
+      }
+   }
+   
    void print()
    {
       cout << "Me: \n";
@@ -243,9 +268,14 @@ public:
 
 		// Shuffle the rows. (This won't really affect this learner, but with other
 		// learners it is a good idea to shuffle the rows before doing any training.)
-//		features.shuffleRows(m_rand, &labels);
+		features.shuffleRows(m_rand, &labels);
       
       freeDTree();
+      
+//      cout << "Train me: " << endl;
+//      features.printMatrix();
+//      labels.printMatrix();
+//      cout << endl;
       
 		// Train it
       vector<unsigned int> availableAttributes;
@@ -254,8 +284,8 @@ public:
       
       dTree = induceTree(availableAttributes, features, labels);
       
-      cout << "DONE =============== \n";
-      dTree->treePrint(0);
+//      cout << "DONE =============== \n";
+//      dTree->treePrint(0);
       
 	}
 
@@ -339,7 +369,11 @@ public:
       
 //      cout << "Generated Split for Attribute: " << attributeIndex << endl;
 //      newNode->print();
-      
+//      
+//      cout << "Info Gain : " << infoGain(newNode) << endl;
+//      
+//      int a;
+//      cin >> a;
       
       return newNode;
    }
@@ -352,11 +386,15 @@ public:
       //Calc Entropy
       attributeSelectedNode->currentEntropy = entropy(attributeSelectedNode->features,
                                                       attributeSelectedNode->labels);
+      
+//      cout << "Parent E: " << attributeSelectedNode->currentEntropy << endl;
+      
       for (int childIndex = 0; childIndex < attributeSelectedNode->children.size(); childIndex++)
       {
          (attributeSelectedNode->children[childIndex])->currentEntropy = entropy(
                         (attributeSelectedNode->children[childIndex])->features,
                         (attributeSelectedNode->children[childIndex])->labels);
+//         cout << "Child E: " << (attributeSelectedNode->children[childIndex])->currentEntropy << endl;
          
       }
       
@@ -398,8 +436,17 @@ public:
       for (int i = 0; i < possibilities.size(); i++)
          infoGainOfPossibilities[i] = infoGain(possibilities[i]);
       
+      ///
+//      cout << "E Choices: ";
+//      for (int i = 0; i < possibilities.size(); i++)
+//         cout << infoGainOfPossibilities[i] << ' ';
+//      cout << endl;
+      ///
+      
       //Select Max Knowldege Gain
-      int iMax = max(infoGainOfPossibilities, possibilities.size());
+      int iMax = myIndexMax(infoGainOfPossibilities, possibilities.size());
+//      cout << "I Max Chosen : " << iMax << endl;
+      
       
       //Clean up possibilites
       delete [] infoGainOfPossibilities;
@@ -471,7 +518,7 @@ public:
          accuracyGainOfPossibilities[i] = accuracyGain(possibilities[i]);
       
       //Select Max Knowldege Gain
-      int iMax = max(accuracyGainOfPossibilities, possibilities.size());
+      int iMax = myIndexMax(accuracyGainOfPossibilities, possibilities.size());
       
       //Clean up possibilites
       delete [] accuracyGainOfPossibilities;
@@ -541,7 +588,7 @@ public:
          if (node == NULL) { cout << "Holly Molly it was NULL\n"; }
          
          //log
-         cout << "Chose Attribute: " << node->indexOfPropertyChosen << endl;
+//         cout << "Chose Attribute: " << node->indexOfPropertyChosen << endl;
          
          //Remove selected attribute from list
          vector<unsigned int> newIndexsOfAttributesAvailable;
@@ -572,7 +619,18 @@ public:
     ************************************************************************/
 	virtual void predict(const std::vector<double>& features, std::vector<double>& labels)
 	{
-      //TODO
+//      cerr << "\nPredict : ";
+//      for (int i = 0; i < features.size(); i++) {
+//         cerr << features[i] << " ";
+//      }
+      
+      labels[0] = dTree->predict(features);
+      
+//      cerr << "\nAnswer: ";
+//      for (int i = 0; i < labels.size(); i++) {
+//         cerr << labels[i] <<  " ";
+//      }
+//      cerr << endl;
 	}
 };
 

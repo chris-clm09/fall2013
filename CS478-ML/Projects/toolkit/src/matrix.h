@@ -127,7 +127,8 @@ public:
 		{
 			for (int c = 0; c < m_data[r].size(); c++)
 			{
-				cout << m_data[r][c] << " ";
+            if (c != 0) cout << ",";
+				cout << m_data[r][c];// << " ";
 			}
 			cout << endl;
 		}
