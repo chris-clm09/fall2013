@@ -156,6 +156,8 @@ public:
     ************************************************************************/
 	virtual void train(Matrix& features, Matrix& labels)
 	{
+      cout << "Using accuracy : " << useAccuracyModel << endl;
+      
 		// Check assumptions
 		if(features.rows() != labels.rows())
 			ThrowError("Expected the features and labels to have the same number of rows");

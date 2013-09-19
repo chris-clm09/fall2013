@@ -38,6 +38,7 @@ class ArgParser
 	string evaluation;
 	char* evalExtra;
 	bool normalize;
+   bool accuracy;
 	bool nominal_to_cat;
 	bool discretize;
 	unsigned int seed;
@@ -51,6 +52,7 @@ public:
 		evaluation = "";
 		seed = (unsigned int)time ( NULL );
 		normalize = false;
+      accuracy = false;
 		nominal_to_cat = false;
 		discretize = false;
 		for ( int i = 1; i < argc; i++ )
@@ -78,6 +80,8 @@ public:
 			}
 			else if ( strcmp ( argv[i], "-N" ) == 0 )
 				normalize = true;
+			else if ( strcmp ( argv[i], "-UA" ) == 0 )
+				accuracy = true;
 			else if ( strcmp ( argv[i], "-C" ) == 0 )
 				nominal_to_cat = true;
 			else if ( strcmp ( argv[i], "-D" ) == 0 )
@@ -106,6 +110,7 @@ public:
 	string getEvaluation() { return evaluation; }
 	char* getEvalExtra() { return evalExtra; }
 	bool getNormal() { return normalize; }
+   bool getAccuracy() { return accuracy; }
 	bool getNominalToCat() { return nominal_to_cat; }
 	bool getDiscretize() { return discretize; }
 	unsigned int getSeed() { return seed; }
@@ -126,14 +131,14 @@ double getTime()
 #endif
 }
 
-SupervisedLearner* getLearner(string model, Rand& r)
+SupervisedLearner* getLearner(string model, Rand& r, bool accuracy)
 {
 	if (model.compare("BaselineLearner") == 0)
 		return new BaselineLearner(r);
 	else if (model.compare("neuralnet") == 0)
 		ThrowError("Sorry, ", model, " is not yet implemented");
 	else if (model.compare("DecisionTree") == 0)
-		return new DecisionTree(r);
+		return new DecisionTree(r, accuracy);
 	else if (model.compare("naivebayes") == 0)
 		ThrowError("Sorry, ", model, " is not yet implemented");
 	else if (model.compare("knn") == 0)
@@ -148,7 +153,7 @@ void doit(ArgParser& parser)
 	// Load the model
 	Rand r ( parser.getSeed() );
 	string model = parser.getLearner();
-	SupervisedLearner* learner = getLearner ( model, r );
+	SupervisedLearner* learner = getLearner ( model, r, parser.getAccuracy());
 
 	// Wrap the learner with the specified filters
 	if ( parser.getNominalToCat() )
