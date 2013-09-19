@@ -15,6 +15,24 @@
 
 #include <iostream>
 
+#define RESET   "\033[0m"
+#define BLACK   "\033[30m"      /* Black */
+#define RED     "\033[31m"      /* Red */
+#define GREEN   "\033[32m"      /* Green */
+#define YELLOW  "\033[33m"      /* Yellow */
+#define BLUE    "\033[34m"      /* Blue */
+#define MAGENTA "\033[35m"      /* Magenta */
+#define CYAN    "\033[36m"      /* Cyan */
+#define WHITE   "\033[37m"      /* White */
+#define BOLDBLACK   "\033[1m\033[30m"      /* Bold Black */
+#define BOLDRED     "\033[1m\033[31m"      /* Bold Red */
+#define BOLDGREEN   "\033[1m\033[32m"      /* Bold Green */
+#define BOLDYELLOW  "\033[1m\033[33m"      /* Bold Yellow */
+#define BOLDBLUE    "\033[1m\033[34m"      /* Bold Blue */
+#define BOLDMAGENTA "\033[1m\033[35m"      /* Bold Magenta */
+#define BOLDCYAN    "\033[1m\033[36m"      /* Bold Cyan */
+#define BOLDWHITE   "\033[1m\033[37m"      /* Bold White */
+
 using namespace std;
 
 /************************************************************************
@@ -57,16 +75,22 @@ class DecisionTreeNode
 {
 public:
    DecisionTreeNode(Matrix& aFeatures, Matrix& aLabels)
-   :indexOfChosenClass(-1), indexOfPropertyChosen(-1), valueOfPropertyChosen(0), currentEntropy(0),
+   :indexOfChosenClass(-1), indexOfPropertyChosen(-1), currentEntropy(0),
    labels(aLabels), features(aFeatures)
    {
       for (int r = 0; r < aFeatures.rows(); r++)
       {
          features.copyRow(aFeatures[r]);
-         aLabels.copyRow(aLabels[r]);
+         labels.copyRow(aLabels[r]);
       }
    }
-   DecisionTreeNode(int aIndexOfChosenClass) { indexOfChosenClass = aIndexOfChosenClass; }
+   
+   DecisionTreeNode(int aIndexOfChosenClass)
+   :indexOfChosenClass(-1), indexOfPropertyChosen(-1), currentEntropy(0)
+   {
+      indexOfChosenClass = aIndexOfChosenClass;
+   }
+   
    ~DecisionTreeNode() { for (int i = 0; i<children.size(); i++) { free(children[i]); } }
 
    Matrix features;
@@ -74,10 +98,65 @@ public:
    
    int indexOfChosenClass; //Index of class chosen or -1 for not chosen
    int indexOfPropertyChosen;
-   double valueOfPropertyChosen;
    double currentEntropy;  //Entropy at just the current node
    vector<DecisionTreeNode*> children;
+   
+   void print()
+   {
+      cout << "Me: \n";
+      cout << "Property: " << indexOfPropertyChosen << endl;
+      
+      cout << "Set: " << features.rows() << endl;
+      features.printMatrix();
+      
+      cout << "Labels: " << labels.rows() << endl;
+      labels.printMatrix();
+      
+      printChildren();
+      
+      cout << "-------------------------\n";
+      
+   }
+   
+   void printChildren()
+   {
+      for (int i = 0; i < children.size(); i++)
+      {
+         cout << "Child : " << i << endl;
+         
+         children[i]->features.printMatrix();
+         children[i]->labels.printMatrix();
+         
+         cout << endl;
+      }
+   }
+   
+   void px(int i){while (i--) {cout << "       ";}}
+   void treePrint(int i)
+   {
+      px(i);
+      
+      cerr << "Node: ";
+      if (indexOfPropertyChosen != -1) cerr << "Property: " << RED << indexOfPropertyChosen << RESET;
+      if (indexOfChosenClass    != -1) cerr << " Class: " << BLUE << indexOfChosenClass << RESET;
+      cerr << endl;
+      
+      for (int c = 0; c < children.size(); c++)
+         if (children[c] != NULL)
+            children[c]->treePrint(i + 1);
+         else
+         {
+            px(i + 1);
+            cerr << "NULL" << endl;
+         }
+   }
 };
+
+
+
+
+
+
 
 
 /*======================================================================
@@ -122,7 +201,7 @@ public:
 
 		// Shuffle the rows. (This won't really affect this learner, but with other
 		// learners it is a good idea to shuffle the rows before doing any training.)
-		features.shuffleRows(m_rand, &labels);
+//		features.shuffleRows(m_rand, &labels);
       
       freeDTree();
       
@@ -132,6 +211,9 @@ public:
          availableAttributes.push_back(i);
       
       dTree = induceTree(availableAttributes, features, labels);
+      
+      cout << "DONE =============== \n";
+      dTree->treePrint(0);
       
 	}
 
@@ -213,6 +295,10 @@ public:
          }
       }
       
+//      cout << "Generated Split for Attribute: " << attributeIndex << endl;
+//      newNode->print();
+      
+      
       return newNode;
    }
    
@@ -247,6 +333,9 @@ public:
       return attributeSelectedNode->currentEntropy - weightedChildrensEntropy;
    }
 
+   /************************************************************************
+    * Return the max index of the max value.
+    ************************************************************************/
    unsigned int max(double *options, int size)
    {
       unsigned int max = 0;
@@ -261,7 +350,7 @@ public:
    /************************************************************************
     * Return the node with the best entropy split.
     ************************************************************************/
-   DecisionTreeNode* returnBestEntropySplitNode(vector<unsigned int> indexsOfAttributesAvailable,
+   DecisionTreeNode* returnBestEntropySplitNode(const vector<unsigned int> indexsOfAttributesAvailable,
                                                Matrix& exampleSet,
                                                Matrix& labels)
    {
@@ -317,6 +406,19 @@ public:
                                Matrix& exampleSet,
                                Matrix& labels)
    {
+      //log
+//      cout << "Atts: ";
+//      
+//      for(int i = 0; i < indexsOfAttributesAvailable.size(); i++)
+//         cout << indexsOfAttributesAvailable[i] << " ";
+//      
+//      cout << "\nSet: " << exampleSet.rows() << ":\n";
+//      exampleSet.printMatrix();
+//      cout << "Labels: "<< labels.rows() << "\n";
+//      labels.printMatrix();
+      //
+      
+      
       DecisionTreeNode * returnNode = NULL;
       
       int sameClassEnum = sameClass(labels);
@@ -334,17 +436,18 @@ public:
          DecisionTreeNode *node = returnBestEntropySplitNode(indexsOfAttributesAvailable,
                                                              exampleSet,
                                                              labels);
-         if (node == NULL)
-         {
-            cout << "Holly Molly it was NULL\n";
-         }
+
+         if (node == NULL) { cout << "Holly Molly it was NULL\n"; }
+         
+         //log
+         cout << "Chose Attribute: " << node->indexOfPropertyChosen << endl;
          
          //Remove selected attribute from list
-         vector<unsigned int> newIndexsOfAttributesAvailable(indexsOfAttributesAvailable.size() - 1);
-
+         vector<unsigned int> newIndexsOfAttributesAvailable;
          for (int i = 0; i < indexsOfAttributesAvailable.size(); i++)
             if (indexsOfAttributesAvailable[i] != node->indexOfPropertyChosen)
                newIndexsOfAttributesAvailable.push_back(indexsOfAttributesAvailable[i]);
+         
          
          //Fill in Remainning Attribute Choices
          for (int childIndex = 0; childIndex < node->children.size(); childIndex++)
@@ -356,6 +459,8 @@ public:
             
             node->children[childIndex] = child;
          }
+         
+         returnNode = node;
       }
       
       return returnNode;

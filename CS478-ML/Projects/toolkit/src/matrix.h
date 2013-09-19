@@ -9,6 +9,9 @@
 #include <vector>
 #include <map>
 #include <string>
+#include <iostream>
+
+using namespace std;
 
 class Rand;
 
@@ -116,6 +119,20 @@ public:
 	// Turn all the continuous attributes into nominal attributes
 	// with the specified number of values. (This method is used by the Discretize filter.)
 	void makeContinuousAttrsNominal(size_t values);
+   
+   
+	void printMatrix()
+	{
+		for (int r = 0; r < rows(); r++)
+		{
+			for (int c = 0; c < m_data[r].size(); c++)
+			{
+				cout << m_data[r][c] << " ";
+			}
+			cout << endl;
+		}
+	}
+   
 };
 
 #endif // MATRIX_H
