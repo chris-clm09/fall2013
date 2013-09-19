@@ -113,14 +113,23 @@ class DecisionTree : public SupervisedLearner
 private:
 	Rand& m_rand; // pseudo-random number generator (not actually used by the baseline learner)
 	DecisionTreeNode* dTree;
+   bool useAccuracyModel;
    
 public:
    /************************************************************************
     * Constructor
     * Init pseudo-random number generator.
     ************************************************************************/
-	DecisionTree(Rand& r) : SupervisedLearner(), m_rand(r), dTree(NULL) { }
+	DecisionTree(Rand& r) : SupervisedLearner(), m_rand(r), dTree(NULL), useAccuracyModel(false) { }
 
+   /************************************************************************
+    * Constructor
+    * Init pseudo-random number generator.
+    * Init if useing accuracy model.
+    ************************************************************************/
+	DecisionTree(Rand& r, bool useAccuracyModel)
+   : SupervisedLearner(), m_rand(r), dTree(NULL), useAccuracyModel(useAccuracyModel) { }
+   
    /************************************************************************
     * Destructor
     ************************************************************************/
@@ -135,14 +144,10 @@ public:
     ************************************************************************/
    void replaceUnknowValuesWithColumnMajority(Matrix &features)
    {
-      cout << "Before Pre-Processing: \n";
-      features.printMatrix();
       for (int r = 0; r < features.rows(); r++)
          for (int c = 0; c < features[r].size(); c++)
             if (features[r][c] == UNKNOWN_VALUE)
                features[r][c] = features.mostCommonValue(c);
-      cout << "AFTER\n";
-      features.printMatrix();
       return;
    }
    
@@ -472,9 +477,14 @@ public:
       }
       else if (exampleSet.rows() > 0)
       {
-         DecisionTreeNode *node = returnBestEntropySplitNode(indexsOfAttributesAvailable,
+         DecisionTreeNode *node = (useAccuracyModel ?
+                                   returnBestAccuracySplitNode(indexsOfAttributesAvailable,
+                                                               exampleSet,
+                                                               labels)
+                                                    :
+                                   returnBestEntropySplitNode(indexsOfAttributesAvailable,
                                                              exampleSet,
-                                                             labels);
+                                                             labels));
 
          if (node == NULL) { cout << "Holly Molly it was NULL\n"; }
          
