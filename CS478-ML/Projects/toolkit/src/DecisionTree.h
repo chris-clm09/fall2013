@@ -132,6 +132,21 @@ public:
    void freeDTree() {if (dTree != NULL) delete dTree; dTree = NULL;}
    
    /************************************************************************
+    ************************************************************************/
+   void replaceUnknowValuesWithColumnMajority(Matrix &features)
+   {
+      cout << "Before Pre-Processing: \n";
+      features.printMatrix();
+      for (int r = 0; r < features.rows(); r++)
+         for (int c = 0; c < features[r].size(); c++)
+            if (features[r][c] == UNKNOWN_VALUE)
+               features[r][c] = features.mostCommonValue(c);
+      cout << "AFTER\n";
+      features.printMatrix();
+      return;
+   }
+   
+   /************************************************************************
 	 * Train the model to predict the labels
     ************************************************************************/
 	virtual void train(Matrix& features, Matrix& labels)
@@ -140,6 +155,8 @@ public:
 		if(features.rows() != labels.rows())
 			ThrowError("Expected the features and labels to have the same number of rows");
 
+      replaceUnknowValuesWithColumnMajority(features);
+      
 		// Shuffle the rows. (This won't really affect this learner, but with other
 		// learners it is a good idea to shuffle the rows before doing any training.)
 		features.shuffleRows(m_rand, &labels);
