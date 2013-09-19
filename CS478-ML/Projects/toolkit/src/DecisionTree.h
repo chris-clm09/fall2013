@@ -36,6 +36,20 @@
 using namespace std;
 
 /************************************************************************
+ * Return the max index of the max value.
+ ************************************************************************/
+unsigned int max(double *options, int size)
+{
+   unsigned int max = 0;
+   
+   for (int i = 1; i < size; i++)
+      if (options[max] > options[i])
+         max = i;
+   
+   return max;
+}
+
+/************************************************************************
  * Returns the number of insances that are of a particular class.
  * classIndex is a enum that represents a particular class.
  ************************************************************************/
@@ -65,6 +79,28 @@ double entropy(Matrix& set, Matrix& labels)
    return entropy;
 }
 
+/************************************************************************
+ * Accuracy
+ ************************************************************************/
+double accuracy(Matrix& set, Matrix& labels)
+{
+   double *percents = new double[labels.valueCount(0)];
+   memset(percents, 0, labels.valueCount(0) * sizeof(double));
+   
+   for (int i  = 0; i < labels.rows();        i++) { percents[ (unsigned int)labels[i][0] ] += 1; }
+   for (int i  = 0; i < labels.valueCount(0); i++) { percents[i] /= (double)labels.rows(); }
+   
+   int maxI = max(percents, labels.valueCount(0));
+   double currentBestGuessAccuracy = percents[maxI];
+   
+   delete [] percents;
+   
+   return currentBestGuessAccuracy;
+}
+
+
+
+
 
 /*======================================================================
   ======================================================================
@@ -74,8 +110,9 @@ double entropy(Matrix& set, Matrix& labels)
 class DecisionTreeNode
 {
 public:
+   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
    DecisionTreeNode(Matrix& aFeatures, Matrix& aLabels)
-   :indexOfChosenClass(-1), indexOfPropertyChosen(-1), currentEntropy(0),
+   :indexOfChosenClass(-1), indexOfPropertyChosen(-1), currentEntropy(0), currentAccuracy(0),
    labels(aLabels), features(aFeatures)
    {
       for (int r = 0; r < aFeatures.rows(); r++)
@@ -86,21 +123,13 @@ public:
    }
    
    DecisionTreeNode(int aIndexOfChosenClass)
-   :indexOfChosenClass(-1), indexOfPropertyChosen(-1), currentEntropy(0)
+   :indexOfChosenClass(-1), indexOfPropertyChosen(-1), currentEntropy(0), currentAccuracy(0)
    {
       indexOfChosenClass = aIndexOfChosenClass;
    }
    
    ~DecisionTreeNode() { for (int i = 0; i<children.size(); i++) { free(children[i]); } }
 
-   Matrix features;
-   Matrix labels;
-   
-   int indexOfChosenClass; //Index of class chosen or -1 for not chosen
-   int indexOfPropertyChosen;
-   double currentEntropy;  //Entropy at just the current node
-   vector<DecisionTreeNode*> children;
-   
    void print()
    {
       cout << "Me: \n";
@@ -150,6 +179,19 @@ public:
             cerr << "NULL" << endl;
          }
    }
+   
+   // ~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Data Members ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+   Matrix features;
+   Matrix labels;
+   
+   int indexOfChosenClass; //Index of class chosen or -1 for not chosen
+   int indexOfPropertyChosen;
+   
+   double currentEntropy;  //Entropy at just the current node
+   double currentAccuracy;
+   
+   vector<DecisionTreeNode*> children;
+   
 };
 
 
@@ -323,7 +365,7 @@ public:
       for (int childIndex = 0; childIndex < attributeSelectedNode->children.size(); childIndex++)
       {
          double weight = (attributeSelectedNode->children[childIndex])->features.rows() /
-                          attributeSelectedNode->features.rows();
+                          (double) attributeSelectedNode->features.rows();
          
          weightedChildrensEntropy += weight *
                                      (attributeSelectedNode->children[childIndex])->currentEntropy;
@@ -331,20 +373,6 @@ public:
       
       //return gain
       return attributeSelectedNode->currentEntropy - weightedChildrensEntropy;
-   }
-
-   /************************************************************************
-    * Return the max index of the max value.
-    ************************************************************************/
-   unsigned int max(double *options, int size)
-   {
-      unsigned int max = 0;
-
-      for (int i = 1; i < size; i++)
-         if (options[max] > options[i])
-            max = i;
-   
-      return max;
    }
    
    /************************************************************************
@@ -386,6 +414,79 @@ public:
       return possibilities[iMax];
       
    }
+   
+   /************************************************************************
+    * Calc Accuracy Gained
+    ************************************************************************/
+   double accuracyGain(DecisionTreeNode* attributeSelectedNode)
+   {
+      //Calc Accuracy
+      attributeSelectedNode->currentAccuracy = accuracy(attributeSelectedNode->features,
+                                                        attributeSelectedNode->labels);
+      for (int childIndex = 0; childIndex < attributeSelectedNode->children.size(); childIndex++)
+      {
+         (attributeSelectedNode->children[childIndex])->currentAccuracy =
+         
+         accuracy((attributeSelectedNode->children[childIndex])->features,
+                  (attributeSelectedNode->children[childIndex])->labels);
+      }
+      
+      //Calc Weigted Entropy of Children
+      double weightedChildrensAccuracy = 0;
+      for (int childIndex = 0; childIndex < attributeSelectedNode->children.size(); childIndex++)
+      {
+         double weight = (attributeSelectedNode->children[childIndex])->features.rows() /
+                         (double) attributeSelectedNode->features.rows();
+         
+         weightedChildrensAccuracy += weight *
+         (attributeSelectedNode->children[childIndex])->currentAccuracy;
+      }
+      
+      //return Accuracy
+      return weightedChildrensAccuracy - attributeSelectedNode->currentAccuracy;
+   }
+
+   
+   /************************************************************************
+    * Return the node with the best accuracy split.
+    ************************************************************************/
+   DecisionTreeNode* returnBestAccuracySplitNode(const vector<unsigned int> indexsOfAttributesAvailable,
+                                                 Matrix& exampleSet,
+                                                 Matrix& labels)
+   {
+      vector<DecisionTreeNode*> possibilities;
+      
+      //Generate all Split Possibilities
+      for (int a = 0; a < indexsOfAttributesAvailable.size(); a++)
+      {
+         possibilities.push_back(decisiontTreeNodeFromAttributeIndex(indexsOfAttributesAvailable[a],
+                                                                     exampleSet,
+                                                                     labels));
+      }
+      
+      //Calc Knowledge Gain
+      double *accuracyGainOfPossibilities = new double[possibilities.size()];
+      
+      for (int i = 0; i < possibilities.size(); i++)
+         accuracyGainOfPossibilities[i] = accuracyGain(possibilities[i]);
+      
+      //Select Max Knowldege Gain
+      int iMax = max(accuracyGainOfPossibilities, possibilities.size());
+      
+      //Clean up possibilites
+      delete [] accuracyGainOfPossibilities;
+      
+      for (int i = 0; i < possibilities.size(); i++)
+      {
+         if (i != iMax)
+            delete possibilities[i];
+      }
+      
+      //Return bestSplit
+      return possibilities[iMax];
+      
+   }
+
    
    /************************************************************************
     * If all elements in Example-set are in the same class
