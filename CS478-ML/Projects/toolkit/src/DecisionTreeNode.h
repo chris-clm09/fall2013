@@ -102,7 +102,7 @@ public:
       px(i);
       
       cerr << "Node: ";
-      if (indexOfPropertyChosen != -1) cerr << "Property: " << RED << indexOfPropertyChosen << RESET;
+      if (indexOfPropertyChosen != -1) cerr << "Property: " << RED << features.attrName(indexOfPropertyChosen) << RESET;
       if (indexOfChosenClass    != -1) cerr << " Class: " << BLUE << indexOfChosenClass << RESET;
       cerr << endl;
       

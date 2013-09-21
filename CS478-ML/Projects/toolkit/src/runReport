@@ -1,0 +1,99 @@
+voting
+Dataset name: ../data/voting.arff
+Number of instances (rows): 435
+Number of attributes (cols): 17
+Learning algorithm: DecisionTree
+Evaluation method: cross
+Rep: 0, Fold: 0, Accuracy: 0.883721
+Rep: 0, Fold: 1, Accuracy: 0.906977
+Rep: 0, Fold: 2, Accuracy: 0.976744
+Rep: 0, Fold: 3, Accuracy: 0.883721
+Rep: 0, Fold: 4, Accuracy: 0.930233
+Rep: 0, Fold: 5, Accuracy: 0.906977
+Rep: 0, Fold: 6, Accuracy: 0.953488
+Rep: 0, Fold: 7, Accuracy: 0.953488
+Rep: 0, Fold: 8, Accuracy: 0.930233
+Rep: 0, Fold: 9, Accuracy: 0.953488
+Mean predictive accuracy: 0.927907
+Dataset name: ../data/voting.arff
+Number of instances (rows): 435
+Number of attributes (cols): 17
+Learning algorithm: DecisionTree
+Evaluation method: cross
+Rep: 0, Fold: 0, Accuracy: 0.930233
+Rep: 0, Fold: 1, Accuracy: 0.906977
+Rep: 0, Fold: 2, Accuracy: 0.976744
+Rep: 0, Fold: 3, Accuracy: 0.906977
+Rep: 0, Fold: 4, Accuracy: 0.930233
+Rep: 0, Fold: 5, Accuracy: 0.930233
+Rep: 0, Fold: 6, Accuracy: 0.930233
+Rep: 0, Fold: 7, Accuracy: 0.860465
+Rep: 0, Fold: 8, Accuracy: 0.883721
+Rep: 0, Fold: 9, Accuracy: 0.930233
+Mean predictive accuracy: 0.918605
+iris
+Dataset name: ../data/iris.arff
+Number of instances (rows): 150
+Number of attributes (cols): 5
+Learning algorithm: DecisionTree
+Evaluation method: cross
+Rep: 0, Fold: 0, Accuracy: 1
+Rep: 0, Fold: 1, Accuracy: 1
+Rep: 0, Fold: 2, Accuracy: 1
+Rep: 0, Fold: 3, Accuracy: 1
+Rep: 0, Fold: 4, Accuracy: 0.933333
+Rep: 0, Fold: 5, Accuracy: 0.866667
+Rep: 0, Fold: 6, Accuracy: 1
+Rep: 0, Fold: 7, Accuracy: 0.933333
+Rep: 0, Fold: 8, Accuracy: 0.933333
+Rep: 0, Fold: 9, Accuracy: 0.933333
+Mean predictive accuracy: 0.96
+Dataset name: ../data/iris.arff
+Number of instances (rows): 150
+Number of attributes (cols): 5
+Learning algorithm: DecisionTree
+Evaluation method: cross
+Rep: 0, Fold: 0, Accuracy: 1
+Rep: 0, Fold: 1, Accuracy: 0.866667
+Rep: 0, Fold: 2, Accuracy: 1
+Rep: 0, Fold: 3, Accuracy: 0.933333
+Rep: 0, Fold: 4, Accuracy: 0.866667
+Rep: 0, Fold: 5, Accuracy: 1
+Rep: 0, Fold: 6, Accuracy: 1
+Rep: 0, Fold: 7, Accuracy: 0.933333
+Rep: 0, Fold: 8, Accuracy: 1
+Rep: 0, Fold: 9, Accuracy: 1
+Mean predictive accuracy: 0.96
+Lenses
+Dataset name: ../data/lenses.arff
+Number of instances (rows): 24
+Number of attributes (cols): 5
+Learning algorithm: DecisionTree
+Evaluation method: cross
+Rep: 0, Fold: 0, Accuracy: 0.5
+Rep: 0, Fold: 1, Accuracy: 0
+Rep: 0, Fold: 2, Accuracy: 1
+Rep: 0, Fold: 3, Accuracy: 1
+Rep: 0, Fold: 4, Accuracy: 1
+Rep: 0, Fold: 5, Accuracy: 0.5
+Rep: 0, Fold: 6, Accuracy: 1
+Rep: 0, Fold: 7, Accuracy: 0.5
+Rep: 0, Fold: 8, Accuracy: 1
+Rep: 0, Fold: 9, Accuracy: 0.5
+Mean predictive accuracy: 0.7
+Dataset name: ../data/lenses.arff
+Number of instances (rows): 24
+Number of attributes (cols): 5
+Learning algorithm: DecisionTree
+Evaluation method: cross
+Rep: 0, Fold: 0, Accuracy: 1
+Rep: 0, Fold: 1, Accuracy: 0.5
+Rep: 0, Fold: 2, Accuracy: 1
+Rep: 0, Fold: 3, Accuracy: 0.5
+Rep: 0, Fold: 4, Accuracy: 0
+Rep: 0, Fold: 5, Accuracy: 0.5
+Rep: 0, Fold: 6, Accuracy: 1
+Rep: 0, Fold: 7, Accuracy: 1
+Rep: 0, Fold: 8, Accuracy: 0.5
+Rep: 0, Fold: 9, Accuracy: 1
+Mean predictive accuracy: 0.7
