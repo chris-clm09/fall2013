@@ -131,8 +131,8 @@ double Matrix::mostCommonValue(size_t col)
 
 void Matrix::copyRow(vector<double>& row)
 {
-	if(row.size() != cols())
-		ThrowError("mismatching size");
+//	if(row.size() != cols())
+//		ThrowError("mismatching size");
 	m_data.push_back(row);
 }
 

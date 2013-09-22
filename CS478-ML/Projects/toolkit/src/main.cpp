@@ -330,7 +330,7 @@ int main(int argc, char *argv[])
 	// Anyone know how to tell Darwin to break if there is a floating point error?
 #	else
 	// Don't silently swallow floating point errors on Linux.
-	feenableexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW);
+//	feenableexcept(FE_INVALID | FE_DIVBYZERO | FE_OVERFLOW);
 #	endif
 #endif
 

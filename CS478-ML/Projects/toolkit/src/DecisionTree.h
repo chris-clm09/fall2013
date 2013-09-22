@@ -35,6 +35,8 @@
 
 #include "DecisionTreeNode.h"
 
+#define USE_MULTI_ACCURACY_MODEL true
+
 using namespace std;
 
 /************************************************************************
@@ -114,13 +116,18 @@ private:
 	Rand& m_rand; // pseudo-random number generator (not actually used by the baseline learner)
 	DecisionTreeNode* dTree;
    bool useAccuracyModel;
+   bool useMultipleAttributesModel;
    
 public:
    /************************************************************************
     * Constructor
     * Init pseudo-random number generator.
     ************************************************************************/
-	DecisionTree(Rand& r) : SupervisedLearner(), m_rand(r), dTree(NULL), useAccuracyModel(false) { }
+	DecisionTree(Rand& r) : SupervisedLearner(),
+                           m_rand(r),
+                           dTree(NULL),
+                           useAccuracyModel(false),
+                           useMultipleAttributesModel(USE_MULTI_ACCURACY_MODEL) { }
 
    /************************************************************************
     * Constructor
@@ -128,7 +135,11 @@ public:
     * Init if useing accuracy model.
     ************************************************************************/
 	DecisionTree(Rand& r, bool useAccuracyModel)
-   : SupervisedLearner(), m_rand(r), dTree(NULL), useAccuracyModel(useAccuracyModel) { }
+   : SupervisedLearner(),
+   m_rand(r),
+   dTree(NULL),
+   useAccuracyModel(useAccuracyModel),
+   useMultipleAttributesModel(USE_MULTI_ACCURACY_MODEL){ }
    
    /************************************************************************
     * Destructor
@@ -274,6 +285,97 @@ public:
       return newNode;
    }
    
+   bool equalRow(const vector<double> &r1, const vector<double> &r2)
+   {
+      if (r1.size() != r2.size())
+         return false;
+      
+      for (int i = 0; i < r1.size(); i++)
+         if (r1[i] != r2[i])
+            return false;
+      
+      return true;
+   }
+   
+   /************************************************************************
+    * Creates a DecisionTreeNode with the given attributeIndex and 
+    * attributeIndex2 as the selection.  Splits the exampleSet accordingly.
+    ************************************************************************/
+   DecisionTreeNode* decisiontTreeNodeFromAttributeIndex(unsigned int attributeIndex,
+                                                         unsigned int attributeIndex2,
+                                                         Matrix& exampleSet,
+                                                         Matrix& labels)
+   {
+      DecisionTreeNode *newNode       = new DecisionTreeNode(exampleSet, labels);
+      newNode->indexOfPropertyChosen  = attributeIndex;
+      newNode->indexOfPropertyChosen2 = attributeIndex2;
+      
+      for (int r = 0; r<labels.rows(); r++)
+      {
+         labels[r].push_back(r);
+      }
+      
+      DecisionTreeNode *splitOnAttOne = decisiontTreeNodeFromAttributeIndex(attributeIndex, exampleSet, labels);
+      DecisionTreeNode *splitOnAttTwo = decisiontTreeNodeFromAttributeIndex(attributeIndex2, exampleSet, labels);
+      
+      int funStat = 0;
+      for (int c = 0; c < splitOnAttOne->children.size(); c++)
+      {
+         for (int c2 = 0; c2 < splitOnAttTwo->children.size(); c2++)
+         {
+            Matrix newExampleSet(exampleSet);
+            Matrix newLabels(labels);
+
+            for (int r = 0; r < (splitOnAttOne->children[c])->features.rows(); r++)
+            {
+               for (int r2 = 0; r2 < (splitOnAttTwo->children[c2])->features.rows(); r2++)
+               {
+//                  if (equalRow((splitOnAttOne->children[c])->features[r], (splitOnAttTwo->children[c2])->features[r2]) &&
+//                      equalRow((splitOnAttOne->children[c])->labels[r],   (splitOnAttTwo->children[c2])->labels[r2]))
+                  if ( (splitOnAttOne->children[c])->labels[r][1] == (splitOnAttTwo->children[c2])->labels[r2][1] )
+                  {
+                     newExampleSet.copyRow((splitOnAttOne->children[c])->features[r]);
+                     
+                     vector<double> cr( (splitOnAttOne->children[c])->labels[r] );
+                     cr.pop_back();
+                     
+                     newLabels.copyRow(cr);
+                     funStat++;
+                  }
+               }
+            }
+            
+            newNode->children.push_back(new DecisionTreeNode(newExampleSet, newLabels));
+         }
+      }
+      
+      for (int r = 0; r<labels.rows(); r++)
+      {
+         if (labels[r].size() != 2)
+         {
+            cout << "holly molly";
+         }
+         
+         labels[r].pop_back();
+      }
+      
+//      int stat = 0;
+//      for (int c = 0; c < newNode->children.size(); c++)
+//      {
+//         stat += (newNode->children[c])->features.rows();
+//      }
+      
+//      cout << "Generated Split for Attribute: " << attributeIndex <<  " : " << attributeIndex2 << endl;
+//      cout << "Split Totals: " << exampleSet.rows() << "|" << stat << " || " << funStat <<  endl;
+//      newNode->print();
+      
+//      int a;
+//      cin >> a;
+      
+      return newNode;
+   }
+
+   
    /************************************************************************
     * Calc Knowledge Gained
     ************************************************************************/
@@ -405,6 +507,16 @@ public:
          possibilities.push_back(decisiontTreeNodeFromAttributeIndex(indexsOfAttributesAvailable[a],
                                                                      exampleSet,
                                                                      labels));
+
+         //Push on all possible pairs of attributes
+         if (useMultipleAttributesModel)
+            for (int b = 1 + a; b < indexsOfAttributesAvailable.size(); b++)
+            {
+                  possibilities.push_back(decisiontTreeNodeFromAttributeIndex(indexsOfAttributesAvailable[a],
+                                                                              indexsOfAttributesAvailable[b],
+                                                                              exampleSet,
+                                                                              labels));
+            }
       }
       
       //Calc Knowledge Gain
@@ -430,7 +542,6 @@ public:
       
    }
 
-   
    /************************************************************************
     * If all elements in Example-set are in the same class
     *      return a leaf node labeled with that class
@@ -489,14 +600,19 @@ public:
          if (node == NULL) { cout << "Holly Molly it was NULL\n"; }
          
          //log
-//         cout << "Chose Attribute: " << node->indexOfPropertyChosen << endl;
+//         cout << "Chose Attribute: " << node->indexOfPropertyChosen << ":" << node->indexOfPropertyChosen2 << endl;
          
          //Remove selected attribute from list
          vector<unsigned int> newIndexsOfAttributesAvailable;
          for (int i = 0; i < indexsOfAttributesAvailable.size(); i++)
-            if (indexsOfAttributesAvailable[i] != node->indexOfPropertyChosen)
+            if (indexsOfAttributesAvailable[i] != node->indexOfPropertyChosen &&
+                (useAccuracyModel ? indexsOfAttributesAvailable[i] != node->indexOfPropertyChosen2 :true))
                newIndexsOfAttributesAvailable.push_back(indexsOfAttributesAvailable[i]);
          
+//         for (int i = 0; i < newIndexsOfAttributesAvailable.size(); i++) {
+//            cout << newIndexsOfAttributesAvailable[i] << " ";
+//         }
+//         cout << endl;
          
          //Fill in Remainning Attribute Choices
          for (int childIndex = 0; childIndex < node->children.size(); childIndex++)
@@ -524,8 +640,10 @@ public:
 //      for (int i = 0; i < features.size(); i++) {
 //         cerr << features[i] << " ";
 //      }
-      
-      labels[0] = dTree->predict(features);
+      if (useMultipleAttributesModel)
+         labels[0] = dTree->predictAccuracyDoubleAtter(features);
+      else
+         labels[0] = dTree->predict(features);
       
 //      cerr << "\nAnswer: ";
 //      for (int i = 0; i < labels.size(); i++) {

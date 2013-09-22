@@ -107,6 +107,6 @@ void AssertFailed()
 {
 	cerr << "Debug Assert Failed!\n";
 	cerr.flush();
-	kill(getpid(), SIGINT); // tell the debugger to break
+//	kill(getpid(), SIGINT); // tell the debugger to break
 }
 #endif
