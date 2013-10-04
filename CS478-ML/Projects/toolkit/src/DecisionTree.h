@@ -191,8 +191,8 @@ public:
       
       dTree = induceTree(availableAttributes, features, labels);
       
-      cout << "DONE =============== \n";
-      dTree->treePrint(0);
+//      cout << "DONE =============== \n";
+//      dTree->treePrint(0);
       
 	}
 
@@ -543,6 +543,56 @@ public:
    }
 
    /************************************************************************
+    * Return if one can split and gain accuracy.
+    ************************************************************************/
+   bool canImproveAccuracy(const vector<unsigned int> indexsOfAttributesAvailable,
+                                                      Matrix& exampleSet,
+                                                      Matrix& labels)
+   {
+      vector<DecisionTreeNode*> possibilities;
+      
+      //Generate all Split Possibilities
+      for (int a = 0; a < indexsOfAttributesAvailable.size(); a++)
+      {
+         possibilities.push_back(decisiontTreeNodeFromAttributeIndex(indexsOfAttributesAvailable[a],
+                                                                     exampleSet,
+                                                                     labels));
+         
+         //Push on all possible pairs of attributes
+         if (useMultipleAttributesModel)
+            for (int b = 1 + a; b < indexsOfAttributesAvailable.size(); b++)
+            {
+               possibilities.push_back(decisiontTreeNodeFromAttributeIndex(indexsOfAttributesAvailable[a],
+                                                                           indexsOfAttributesAvailable[b],
+                                                                           exampleSet,
+                                                                           labels));
+            }
+      }
+      
+      //Calc Knowledge Gain
+      double *accuracyGainOfPossibilities = new double[possibilities.size()];
+      
+      for (int i = 0; i < possibilities.size(); i++)
+         accuracyGainOfPossibilities[i] = accuracyGain(possibilities[i]);
+      
+      //Select Max Knowldege Gain
+      int iMax = myIndexMax(accuracyGainOfPossibilities, possibilities.size());
+      
+      bool answer = accuracyGainOfPossibilities[iMax] > 0;
+      
+      //Clean up possibilites
+      delete [] accuracyGainOfPossibilities;
+      
+      for (int i = 0; i < possibilities.size(); i++)
+            delete possibilities[i];
+      
+      //Return bestSplit
+      return answer;
+      
+   }
+
+   
+   /************************************************************************
     * If all elements in Example-set are in the same class
     *      return a leaf node labeled with that class
     * Else if Properties is empty
@@ -582,7 +632,7 @@ public:
       {
          returnNode = new DecisionTreeNode(sameClassEnum);
       }
-      else if (indexsOfAttributesAvailable.size() < 1)
+      else if (indexsOfAttributesAvailable.size() < 1 || (useAccuracyModel && !canImproveAccuracy(indexsOfAttributesAvailable, exampleSet, labels)))
       {
          returnNode = new DecisionTreeNode(labels.mostCommonValue(0));
       }
