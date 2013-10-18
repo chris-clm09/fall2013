@@ -5,7 +5,6 @@
 
 #include "learner.h"
 #include "baseline.h"
-//#include "DecisionTree.h"
 #include "NN.h"
 
 #include "error.h"
@@ -135,7 +134,7 @@ double getTime()
 SupervisedLearner* getLearner(string model, Rand& r, bool accuracy)
 {
 	if (model.compare("BaselineLearner")   == 0) return new BaselineLearner(r);
-	else if (model.compare("neuralnet")    == 0) return new NN(r);
+//	else if (model.compare("neuralnet")    == 0) return new NN(r);
 	else if (model.compare("DecisionTree") == 0) return new DecisionTree(r, accuracy);
 	else if (model.compare("naivebayes")   == 0) ThrowError("Sorry, ", model, " is not yet implemented");
 	else if (model.compare("knn")          == 0) ThrowError("Sorry, ", model, " is not yet implemented");
