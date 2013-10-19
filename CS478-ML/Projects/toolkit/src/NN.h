@@ -13,6 +13,8 @@
 #include "error.h"
 #include "math.h"
 
+#include "NNNode.h"
+
 #include <iostream>
 
 #define RESET       "\033[0m"
@@ -32,16 +34,23 @@
 using namespace std;
 
 
+const int NUM_HIDDEN_LAYERS    = 2;
+const int NUM_NODES_IN_LAYER[] = {6, 4};
+
+//#define NUM_HIDDEN_LAYERS 1
+//#define NUM_NODES_IN_LAYER {6}
+
+
 /*======================================================================
  ======================================================================
- |
- |
+ | Represents a Neural Net Learning Alorithm
  ======================================================================
  ======================================================================*/
 class NN : public SupervisedLearner
 {
 private:
-	Rand& m_rand; // pseudo-random number generator (not actually used by the baseline learner)
+	Rand& m_rand;
+   vector<vector<NNNode*>*> nnLayers;
    
 public:
    /************************************************************************
@@ -49,12 +58,22 @@ public:
     * Init pseudo-random number generator.
     ************************************************************************/
 	NN(Rand& r) : SupervisedLearner(), m_rand(r)
-   { }
+   {
+      NNNode(r, 10);
+   }
    
    /************************************************************************
     * Destructor
     ************************************************************************/
-	virtual ~NN() { }
+	virtual ~NN() { freeNeuralNet(); }
+
+   /************************************************************************
+    * Cleans up the NuralNet
+    ************************************************************************/
+   void freeNeuralNet()
+   {
+      return;
+   }
    
    /************************************************************************
     ************************************************************************/
@@ -82,8 +101,116 @@ public:
 		// learners it is a good idea to shuffle the rows before doing any training.)
 		features.shuffleRows(m_rand, &labels);
       
+      //Setup Nural Network
+      setUpNuralNet(features, labels);
+      printNN();
+      cout << "\n\t SET Up Complete\n";
+      
+      //Run NN Learning Algorithm
+      
 	}
    
+   /************************************************************************
+    * This function will set up the nural network.
+    ************************************************************************/
+   void setUpNuralNet(Matrix& features, Matrix& labels)
+   {
+      //Setup input nodes
+      vector<NNNode*>* inNodes = new vector<NNNode*>;
+      
+      for (int i  = 0; i < features.cols(); i++)
+         inNodes->push_back(new NNNode(m_rand, 0));
+      
+      nnLayers.push_back(inNodes);
+      
+      //Setup hidden nodes
+      for (int l = 0; l < NUM_HIDDEN_LAYERS; l++)
+      {
+         vector<NNNode*>* hiddenLayer = new vector<NNNode*>;
+
+         for (int n = 0; n < NUM_NODES_IN_LAYER[l]; n++)
+            hiddenLayer->push_back(new NNNode(m_rand, nnLayers[l]->size()));
+         
+         nnLayers.push_back(hiddenLayer);
+      }
+      
+      //Setup output nodes
+      vector<NNNode*>* outputNodes = new vector<NNNode*>;
+      
+      for (int i = 0; i < labels.valueCount(0); i++)
+         outputNodes->push_back(new NNNode(m_rand, NUM_NODES_IN_LAYER[NUM_HIDDEN_LAYERS-1]));
+      
+      nnLayers.push_back(outputNodes);
+      
+      return;
+   }
+   
+   /************************************************************************
+    * This function will print out the neural net.
+    ************************************************************************/
+   void printNN()
+   {
+      for (int i  = 0; i < nnLayers.size(); i++)
+      {
+         cout << "Layer(" << i << "): ";
+         for (int n = 0; n < nnLayers[i]->size(); n++)
+         {
+            NNNode* node = (*(nnLayers[i]))[n];
+            cout << "N:(V:" << node->value << ",NW:" << node->incomeingWeights.size() << ") ; ";
+         }
+         cout << endl;
+      }
+      return;
+   }
+   
+   /************************************************************************
+    * This function will simulate a NN Learning Algorithm.
+    ************************************************************************/
+   void learn(Matrix &features, Matrix &labels)
+   {
+      return;
+   }
+   
+   /************************************************************************
+    ************************************************************************/
+   void runInstanceTrough(vector<double>& row, double ansClass)
+   {
+      //SET Input Node Values
+      
+      //FOREACH non-Input Layer
+      //Calculate value of node
+      
+      return;
+   }
+   
+   /************************************************************************
+    ************************************************************************/
+   void backErrorPropigate(double answer) {return;}
+   
+   /************************************************************************
+    ************************************************************************/
+   void calcBackErrorPropigation(double answer)
+   {
+      //Calc error of output nodes
+      //Calc error of the hidden nodes
+      return;
+   }
+   
+   /************************************************************************
+    *
+    ************************************************************************/
+   void calcErrorOfOutputNodes(double answer)
+   {
+      //Get the max output value
+      //FOREACH output node calculate error
+      //Error == (node->value < max ? calcError w/ Node Value : calcError w/ max - 1
+      
+      return;
+   }
+   
+   /************************************************************************
+    ************************************************************************/
+   void applyBackErrorCalculations() {return;}
    
    
    /************************************************************************
