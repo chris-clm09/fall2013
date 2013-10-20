@@ -171,22 +171,27 @@ public:
    void learn(Matrix &features, Matrix &labels)
    {
       double error = 1000.0;
-      while (error > STOP_ERROR_VALUE)
+      int epic = 0;
+      while (error > STOP_ERROR_VALUE || epic < 100)
       {
          error = 0;
          for (int i = 0; i < features.rows(); i++)
          {
-            runInstanceTrough(features[i], labels[i][0]);
+            runInstanceTrough(features[i]);
             error = backErrorPropigate(labels[i][0]);
          }
          error /= (double)features.rows();
+         
+         cout << epic << " " << error << endl;
+         
+         epic++;
       }
       return;
    }
    
    /************************************************************************
     ************************************************************************/
-   void runInstanceTrough(vector<double>& row, double ansClass)
+   void runInstanceTrough(const vector<double>& row)
    {
       //SET Input Node Values
       for (int i = 0; i < row.size(); i++)
@@ -240,6 +245,7 @@ public:
                                                                   n,
                                                                   *(nnLayers[l-1])
                                                                   );
+            errorFound += abs((*layer)[n]->errorValue);
          }
       }
       
@@ -305,19 +311,11 @@ public:
    /************************************************************************
 	 * Evaluate the features and predict the labels
     ************************************************************************/
-	virtual void predict(const std::vector<double>& features, std::vector<double>& labels)
+	virtual void predict(const std::vector<double>& instance, std::vector<double>& labels)
 	{
-      //      cerr << "\nPredict : ";
-      //      for (int i = 0; i < features.size(); i++) {
-      //         cerr << features[i] << " ";
-      //      }
-      
-      
-      //      cerr << "\nAnswer: ";
-      //      for (int i = 0; i < labels.size(); i++) {
-      //         cerr << labels[i] <<  " ";
-      //      }
-      //      cerr << endl;
+      runInstanceTrough(instance);
+//      printNN();
+      labels[0] = getIndexOfTheMaxOutput();
 	}
 };
 
