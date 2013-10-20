@@ -13,6 +13,9 @@
 #include "math.h"
 #include <vector>
 
+#define _USE_MATH_DEFINES
+#include <cmath>
+
 #include <iostream>
 
 #define RESET       "\033[0m"
@@ -43,14 +46,13 @@ public:
    /************************************************************************
     * Constructor
     ************************************************************************/
-   NNNode(Rand& r, int numIncomingConnections, bool isOutputNode=false)
+   NNNode(Rand& r, int numIncomingConnections)
    :value(0),
     errorValue(0),
-    incomeingWeights(numIncomingConnections,0),
-    changeInIncomeingWeights(numIncomingConnections,0),
-    isOutputNode(isOutputNode)
+    incomeingWeights(numIncomingConnections,1),
+    changeInIncomeingWeights(numIncomingConnections,0)
    {
-      randomizeIncomeingWeights(r);
+//      randomizeIncomeingWeights(r);
       return;
    }
    
@@ -85,12 +87,25 @@ public:
     * Sets the nodes values according to the value and weight of the
     * incomeing weights.
     ************************************************************************/
-   void calculateValue()
+   double calculateValue(vector<NNNode*>& backNodes)
    {
-      
-      return;
+      value = 1 / (1.0 + pow(M_E, -calcNet(backNodes)));
+      return value;
    }
 
+   /************************************************************************
+    * Calcualtes the net value st net = sum(inputs) wi*xi
+    ************************************************************************/
+   double calcNet(vector<NNNode*>& backNodes)
+   {
+      double total = 0;
+      
+      for (int i = 0; i < incomeingWeights.size(); i++)
+         total += incomeingWeights[i] * backNodes[i]->value;
+      
+      return total;
+   }
+   
    /************************************************************************
     * Calculates the error of an output node and calculates the incomeing
     * weights accordingly.
@@ -111,12 +126,22 @@ public:
       return;
    }
    
+   /************************************************************************
+    * Apply the change in weights to incomeingWeights.
+    ************************************************************************/
+   void applyChangeInIncomeingWeightsToIncomeingWeights()
+   {
+      for (int i  = 0; i < incomeingWeights.size(); i++)
+         incomeingWeights[i] += changeInIncomeingWeights[i];
+      
+      return;
+   }
+   
    //----------------------Data Variables----------------------//
    double value;
    double errorValue;
    vector<double> incomeingWeights;
    vector<double> changeInIncomeingWeights;
-   bool isOutputNode;
 };
 
 #endif

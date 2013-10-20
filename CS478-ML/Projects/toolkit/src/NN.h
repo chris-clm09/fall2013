@@ -33,6 +33,7 @@
 
 using namespace std;
 
+const double STOP_ERROR_VALUE  = 5.0;
 
 const int NUM_HIDDEN_LAYERS    = 2;
 const int NUM_NODES_IN_LAYER[] = {6, 4};
@@ -59,7 +60,6 @@ public:
     ************************************************************************/
 	NN(Rand& r) : SupervisedLearner(), m_rand(r)
    {
-      NNNode(r, 10);
    }
    
    /************************************************************************
@@ -102,11 +102,13 @@ public:
 		features.shuffleRows(m_rand, &labels);
       
       //Setup Nural Network
+      cout << "\n\t STARTING Up Complete\n";
       setUpNuralNet(features, labels);
       printNN();
       cout << "\n\t SET Up Complete\n";
       
       //Run NN Learning Algorithm
+      learn(features, labels);
       
 	}
    
@@ -168,6 +170,15 @@ public:
     ************************************************************************/
    void learn(Matrix &features, Matrix &labels)
    {
+//      double error = 1000.0;
+//      while (error > STOP_ERROR_VALUE)
+//      {
+      for (int i = 0; i < features.rows(); i++)
+      {
+         runInstanceTrough(features[i], labels[i][0]);
+         backErrorPropigate(labels[i][0]);
+      }
+//      }
       return;
    }
    
@@ -176,41 +187,119 @@ public:
    void runInstanceTrough(vector<double>& row, double ansClass)
    {
       //SET Input Node Values
+      for (int i = 0; i < row.size(); i++)
+      {
+        (*(nnLayers[0]))[i]->value = row[i];
+      }
       
       //FOREACH non-Input Layer
-      //Calculate value of node
-      
+      for (int i = 1; i < nnLayers.size(); i++)
+      {
+         for (int n = 0; n < (*(nnLayers[i])).size(); n++)
+         {
+            //Calculate value of node
+            (*(nnLayers[i]))[n]->calculateValue( (*(nnLayers[i-1])) );
+         }
+      }
       return;
    }
    
    /************************************************************************
+    * Calculates the error at each node, the change in weights required
+    * given the error, and then applies the change of weights to each
+    * node link weight.
     ************************************************************************/
-   void backErrorPropigate(double answer) {return;}
+   void backErrorPropigate(double answer)
+   {
+      calcBackErrorPropigation(answer);
+      applyBackErrorCalculations();
+      return;
+   }
    
    /************************************************************************
+    * Calculates and set the error for the output nodes and then for
+    * each hidden node.  Also updates the change in weights requried for
+    * the given amount of error found.
     ************************************************************************/
    void calcBackErrorPropigation(double answer)
    {
       //Calc error of output nodes
+      calcErrorOfOutputNodes(answer);
+      
       //Calc error of the hidden nodes
-      return;
-   }
-   
-   /************************************************************************
-    *
-    ************************************************************************/
-   void calcErrorOfOutputNodes(double answer)
-   {
-      //Get the max output value
-      //FOREACH output node calculate error
-      //Error == (node->value < max ? calcError w/ Node Value : calcError w/ max - 1
+      for (int l = nnLayers.size() - 2; l > 0; l--)
+      {
+         vector<NNNode*>* layer = nnLayers[l];
+         for (int n = 0; n < layer->size(); n++)
+         {
+            (*layer)[n]->calculateErrorValueAndSetChangeInWeights(*(nnLayers[l+1]));
+         }
+      }
       
       return;
    }
    
    /************************************************************************
+    * Calculates the error and sets the weight for the max out put node and
+    * the answer output node.  If they are the same no error occured.
     ************************************************************************/
-   void applyBackErrorCalculations() {return;}
+   void calcErrorOfOutputNodes(double answer)
+   {
+      //Get the max output value
+      int max = getIndexOfTheMaxOutput();
+      
+      if (max == (int)answer) return; // No Error Here!
+      
+      vector<NNNode*> *outputLayer = nnLayers[nnLayers.size() - 1];
+
+      //FOREACH output node calculate error
+//      for (int n = 0; n < outputLayer->size(); n++)
+//      {
+//         //Error == (node->value < max ? calcError w/ Node Value : calcError w/ max - 1
+//         if ((*outputLayer)[n]->value <= max)
+//         {
+//            (*outputLayer)[n]->calculateErrorValueAndSetChangeInWeights((*outputLayer)[n]->value);
+//         }
+//         else
+//         {
+//            (*outputLayer)[n]->calculateErrorValueAndSetChangeInWeights();
+//         }
+//      }
+
+      (*outputLayer)[max]->calculateErrorValueAndSetChangeInWeights((*outputLayer)[max]->value - 1);
+      (*outputLayer)[(int)answer]->calculateErrorValueAndSetChangeInWeights((*outputLayer)[max]->value);
+      
+      return;
+   }
+   
+   /************************************************************************
+    * Returns the index of the output with the max value.
+    ************************************************************************/
+   int getIndexOfTheMaxOutput()
+   {
+      int max = 0;
+      
+      vector<NNNode*> *outputLayer = nnLayers[nnLayers.size() - 1];
+      
+      for (int n = 1; n < outputLayer->size(); n++)
+         if ((*outputLayer)[max] < (*outputLayer)[n])
+            max = n;
+
+      return max;
+   }
+   
+   /************************************************************************
+    ************************************************************************/
+   void applyBackErrorCalculations()
+   {
+      //FOREACH non-Input Layer
+      for (int i = 1; i < nnLayers.size(); i++)
+         for (int n = 0; n < (*(nnLayers[i])).size(); n++)
+            //Calculate value of node
+            (*(nnLayers[i]))[n]->applyChangeInIncomeingWeightsToIncomeingWeights();
+
+      return;
+   }
    
    
    /************************************************************************

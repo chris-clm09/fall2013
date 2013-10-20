@@ -113,4 +113,10 @@ clean : partialcleandbg partialcleanopt
 	rm -f $(DEPS_OPT)
 	rm -f $(DEPS_DBG)
 
+run:
+	./../bin/MLSystemManager -L nn -A ../data/iris.arff -E training
+
+run1: 
+	./../bin/MLSystemManager -L nn -A ../data/lenses.arff -E training
+
 .PHONY: clean partialcleandbg partialcleanopt dbg opt
