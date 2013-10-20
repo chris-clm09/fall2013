@@ -50,7 +50,8 @@ public:
    :value(0),
     errorValue(0),
     incomeingWeights(numIncomingConnections,1),
-    changeInIncomeingWeights(numIncomingConnections,0)
+    changeInIncomeingWeights(numIncomingConnections,0),
+   LEARNING_CONSTANT(0.3)
    {
 //      randomizeIncomeingWeights(r);
       return;
@@ -107,21 +108,39 @@ public:
    }
    
    /************************************************************************
+    * OUTPUT NODE
     * Calculates the error of an output node and calculates the incomeing
     * weights accordingly.
     ************************************************************************/
-   void calculateErrorValueAndSetChangeInWeights(double expected)
+   void calculateErrorValueAndSetChangeInWeights(double expected, vector<NNNode*>& backNodes)
    {
+      errorValue = (expected - value) * (value * (1 - value));
+      
+      for (int i = 0; i < backNodes.size(); i++)
+         changeInIncomeingWeights[i] = LEARNING_CONSTANT * backNodes[i]->value * errorValue;
       
       return;
    }
    
    /************************************************************************
+    * HIDDEN NODE
     * Calcualtes the error of a hidden node and sets its incomeing weights
     * accordingly.
     ************************************************************************/
-   void calculateErrorValueAndSetChangeInWeights(vector<NNNode*>& frontNodes)
+   void calculateErrorValueAndSetChangeInWeights(vector<NNNode*>& frontNodes,
+                                                 int frontLinkIndex,
+                                                 vector<NNNode*>& backNodes)
    {
+      errorValue = 0;
+      for (int i  = 0; i < frontNodes.size(); i++)
+      {
+         errorValue += frontNodes[i]->errorValue *
+                       frontNodes[i]->incomeingWeights[frontLinkIndex] *
+                       (value * (1 - value));
+      }
+      
+      for (int i = 0; i < backNodes.size(); i++)
+         changeInIncomeingWeights[i] = LEARNING_CONSTANT * backNodes[i]->value * errorValue;
       
       return;
    }
@@ -142,6 +161,7 @@ public:
    double errorValue;
    vector<double> incomeingWeights;
    vector<double> changeInIncomeingWeights;
+   const double LEARNING_CONSTANT;
 };
 
 #endif
