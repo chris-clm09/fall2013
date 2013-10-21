@@ -33,7 +33,7 @@
 
 using namespace std;
 
-const double STOP_ERROR_VALUE  = 5.0;
+const double STOP_ERROR_VALUE  = 0.0000001;
 
 const int NUM_HIDDEN_LAYERS    = 2;
 const int NUM_NODES_IN_LAYER[] = {6, 4};
@@ -171,7 +171,7 @@ public:
       
       double error = 1000.0;
       int epic = 0;
-      while (error > STOP_ERROR_VALUE || epic < 100)
+      while (error > STOP_ERROR_VALUE)// || epic < 1000)
       {
          error = 0;
          for (int i = 0; i < features.rows(); i++)
@@ -181,7 +181,7 @@ public:
          }
          error /= (double)features.rows();
          
-         cout << epic << " " << error << endl;
+//         cout << epic << " " << error << endl;
          
          if (min == 0)
             min = error;
@@ -191,7 +191,7 @@ public:
          epic++;
          features.shuffleRows(m_rand, &labels);
       }
-      cout << "MIN Error: " << min << endl;
+      cout << "\n\tMIN Error: " << min << endl;
       return;
    }
    
