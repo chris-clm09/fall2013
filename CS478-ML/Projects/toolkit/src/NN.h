@@ -181,8 +181,6 @@ public:
          }
          error /= (double)features.rows();
          
-//         cout << epic << " " << error << endl;
-         
          if (min == 0)
             min = error;
          else if (error < min)
@@ -191,7 +189,9 @@ public:
          epic++;
          features.shuffleRows(m_rand, &labels);
       }
-      cout << "\n\tMIN Error: " << min << endl;
+      
+      cout << "MIN Error: " << min << endl;
+      
       return;
    }
    
@@ -321,7 +321,6 @@ public:
 	virtual void predict(const std::vector<double>& instance, std::vector<double>& labels)
 	{
       runInstanceTrough(instance);
-//      printNN();
       labels[0] = getIndexOfTheMaxOutput();
 	}
 };

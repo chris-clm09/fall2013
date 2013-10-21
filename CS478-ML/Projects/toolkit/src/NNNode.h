@@ -51,7 +51,9 @@ public:
     errorValue(0),
     incomeingWeights(numIncomingConnections,1),
     changeInIncomeingWeights(numIncomingConnections,0),
-   LEARNING_CONSTANT(0.3)
+    LEARNING_RATE(0.3),
+    changeInIncomeingWeightsLastTime(numIncomingConnections, 0),
+    MOMENTUM_RATE(0.0)
    {
       randomizeIncomeingWeights(r);
       return;
@@ -80,7 +82,7 @@ public:
          total += incomeingWeights[i];
       }
       
-      //Should be Zero
+      //Should be Zero or REALY close it.
       return total;
    }
    
@@ -117,7 +119,12 @@ public:
       errorValue = (expected - value) * (value * (1 - value));
       
       for (int i = 0; i < backNodes.size(); i++)
-         changeInIncomeingWeights[i] = LEARNING_CONSTANT * backNodes[i]->value * errorValue;
+      {
+         changeInIncomeingWeights[i] = calChangeInWeight(backNodes[i]->value,
+                                                         errorValue,
+                                                         changeInIncomeingWeightsLastTime[i]);
+         changeInIncomeingWeightsLastTime[i] = changeInIncomeingWeights[i];
+      }
       
       return;
    }
@@ -140,9 +147,23 @@ public:
       }
       
       for (int i = 0; i < backNodes.size(); i++)
-         changeInIncomeingWeights[i] = LEARNING_CONSTANT * backNodes[i]->value * errorValue;
+      {
+         changeInIncomeingWeights[i] = calChangeInWeight(backNodes[i]->value,
+                                                         errorValue,
+                                                         changeInIncomeingWeightsLastTime[i]);
+         changeInIncomeingWeightsLastTime[i] = changeInIncomeingWeights[i];
+      }
       
       return;
+   }
+   
+   /************************************************************************
+    * Calculates the change in weight required.
+    ************************************************************************/
+   double calChangeInWeight(double backNodeValue, double errorValue, double weightChangeLastTime)
+   {
+      return (LEARNING_RATE * backNodeValue * errorValue) +
+             (MOMENTUM_RATE * weightChangeLastTime);
    }
    
    /************************************************************************
@@ -161,7 +182,9 @@ public:
    double errorValue;
    vector<double> incomeingWeights;
    vector<double> changeInIncomeingWeights;
-   const double LEARNING_CONSTANT;
+   const double LEARNING_RATE;
+   vector<double> changeInIncomeingWeightsLastTime;
+   const double MOMENTUM_RATE;
 };
 
 #endif
