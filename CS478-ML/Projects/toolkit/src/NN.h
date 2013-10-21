@@ -288,7 +288,7 @@ public:
       vector<NNNode*> *outputLayer = nnLayers[nnLayers.size() - 1];
       
       for (int n = 1; n < outputLayer->size(); n++)
-         if ((*outputLayer)[max] < (*outputLayer)[n])
+         if ((*outputLayer)[max]->value < (*outputLayer)[n]->value)
             max = n;
 
       return max;
