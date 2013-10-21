@@ -102,10 +102,7 @@ public:
 		features.shuffleRows(m_rand, &labels);
       
       //Setup Nural Network
-      cout << "\n\t STARTING Up Complete\n";
       setUpNuralNet(features, labels);
-      printNN();
-      cout << "\n\t SET Up Complete\n";
       
       //Run NN Learning Algorithm
       learn(features, labels);
@@ -170,6 +167,8 @@ public:
     ************************************************************************/
    void learn(Matrix &features, Matrix &labels)
    {
+      double min = 0;
+      
       double error = 1000.0;
       int epic = 0;
       while (error > STOP_ERROR_VALUE || epic < 100)
@@ -184,8 +183,15 @@ public:
          
          cout << epic << " " << error << endl;
          
+         if (min == 0)
+            min = error;
+         else if (error < min)
+            min = error;
+         
          epic++;
+         features.shuffleRows(m_rand, &labels);
       }
+      cout << "MIN Error: " << min << endl;
       return;
    }
    
@@ -208,6 +214,7 @@ public:
             (*(nnLayers[i]))[n]->calculateValue( (*(nnLayers[i-1])) );
          }
       }
+      
       return;
    }
    

@@ -53,7 +53,7 @@ public:
     changeInIncomeingWeights(numIncomingConnections,0),
    LEARNING_CONSTANT(0.3)
    {
-//      randomizeIncomeingWeights(r);
+      randomizeIncomeingWeights(r);
       return;
    }
    
