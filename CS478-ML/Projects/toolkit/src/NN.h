@@ -35,11 +35,11 @@ using namespace std;
 
 const double STOP_ERROR_VALUE  = 0.0000001;
 
-const int NUM_HIDDEN_LAYERS    = 2;
-const int NUM_NODES_IN_LAYER[] = {6, 4};
+//const int NUM_HIDDEN_LAYERS    = 2;
+//const int NUM_NODES_IN_LAYER[] = {6, 4};
 
-//#define NUM_HIDDEN_LAYERS 1
-//#define NUM_NODES_IN_LAYER {6}
+const int NUM_HIDDEN_LAYERS    = 1;
+const int NUM_NODES_IN_LAYER[] = {12};
 
 
 /*======================================================================
@@ -103,6 +103,7 @@ public:
       
       //Setup Nural Network
       setUpNuralNet(features, labels);
+      printNN();
       
       //Run NN Learning Algorithm
       learn(features, labels);
@@ -169,9 +170,12 @@ public:
    {
       double min = 0;
       
+      int tic = 0;
+      double ticCnt = 0;
+      
       double error = 1000.0;
       int epic = 0;
-      while (error > STOP_ERROR_VALUE)// || epic < 1000)
+      while (error > STOP_ERROR_VALUE && epic < 100000)
       {
          error = 0;
          for (int i = 0; i < features.rows(); i++)
@@ -185,6 +189,14 @@ public:
             min = error;
          else if (error < min)
             min = error;
+         
+         ticCnt += error;
+         if (tic++ / 10 == 1)
+         {
+            cout << ticCnt / 10.0 << endl;
+            ticCnt = 0;
+            tic = 0;
+         }
          
          epic++;
          features.shuffleRows(m_rand, &labels);

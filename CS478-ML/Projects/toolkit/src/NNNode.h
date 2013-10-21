@@ -32,6 +32,12 @@
 #define BOLDBLUE    "\033[1m\033[34m"  /* Bold Blue */
 #define BOLDWHITE   "\033[1m\033[37m"  /* Bold White */
 
+//======================================================================
+//======================================================================
+#define THE_LEARNING_RATE 0.6
+#define THE_MOMENTUM_RATE 0.0
+//======================================================================
+//======================================================================
 using namespace std;
 
 
@@ -51,9 +57,9 @@ public:
     errorValue(0),
     incomeingWeights(numIncomingConnections,1),
     changeInIncomeingWeights(numIncomingConnections,0),
-    LEARNING_RATE(0.3),
+    LEARNING_RATE(THE_LEARNING_RATE),
     changeInIncomeingWeightsLastTime(numIncomingConnections, 0),
-    MOMENTUM_RATE(0.0)
+    MOMENTUM_RATE(THE_MOMENTUM_RATE)
    {
       randomizeIncomeingWeights(r);
       return;

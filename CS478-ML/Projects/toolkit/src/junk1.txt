@@ -1,0 +1,87 @@
+rm -f ../bin/MLSystemManager
+g++ -I/usr/local/include/SDL -D_THREAD_SAFE -DDARWIN -I/sw/include -I../../../src -no-cpp-precomp -O3 -c main.cpp -o ../obj/opt/main.o
+g++ -O3 -o ../bin/MLSystemManager ../obj/opt/main.o ../obj/opt/error.o ../obj/opt/filter.o ../obj/opt/learner.o ../obj/opt/matrix.o ../obj/opt/rand.o  -framework AppKit 
+./../bin/MLSystemManager -L nn -A ../data/vowel2.arff -E random .25 
+Dataset name: ../data/vowel2.arff
+Number of instances (rows): 990
+Number of attributes (cols): 13
+Learning algorithm: nn
+Evaluation method: random
+Layer(0): N:(V:0,NW:0) ; N:(V:0,NW:0) ; N:(V:0,NW:0) ; N:(V:0,NW:0) ; N:(V:0,NW:0) ; N:(V:0,NW:0) ; N:(V:0,NW:0) ; N:(V:0,NW:0) ; N:(V:0,NW:0) ; N:(V:0,NW:0) ; N:(V:0,NW:0) ; N:(V:0,NW:0) ; 
+Layer(1): N:(V:0,NW:12) ; N:(V:0,NW:12) ; N:(V:0,NW:12) ; N:(V:0,NW:12) ; N:(V:0,NW:12) ; N:(V:0,NW:12) ; N:(V:0,NW:12) ; N:(V:0,NW:12) ; N:(V:0,NW:12) ; N:(V:0,NW:12) ; N:(V:0,NW:12) ; N:(V:0,NW:12) ; 
+Layer(2): N:(V:0,NW:12) ; N:(V:0,NW:12) ; N:(V:0,NW:12) ; N:(V:0,NW:12) ; N:(V:0,NW:12) ; N:(V:0,NW:12) ; N:(V:0,NW:12) ; N:(V:0,NW:12) ; N:(V:0,NW:12) ; N:(V:0,NW:12) ; N:(V:0,NW:12) ; 
+0.00126916
+0.00166949
+0.00158837
+0.0013573
+0.0014821
+0.00195905
+0.000702661
+0.00109998
+0.0010465
+0.000950939
+0.000752761
+0.000613899
+0.00074229
+0.000347758
+0.000652816
+0.00132494
+0.000672808
+0.000756662
+0.000378813
+0.000381987
+0.000484382
+0.000385854
+0.000460439
+0.000491275
+0.000756965
+0.000784615
+0.000549595
+0.000676056
+0.000961619
+0.000405
+0.000384744
+0.00051953
+0.000697824
+0.000882499
+0.00070519
+0.000870507
+0.000475968
+0.000562614
+0.000547454
+0.000329503
+MIN Error: 1.98892e-08
+
+
+Accuracy on the training set: (does NOT imply the ability to generalize)
+hid: 17/17
+hId: 13/19
+hEd: 28/28
+hAd: 20/21
+hYd: 22/25
+had: 15/26
+hOd: 21/26
+hod: 20/24
+hUd: 19/19
+hud: 21/23
+hed: 17/20
+Set accuracy: 0.858871
+
+
+Accuracy on the test set:
+hid: 51/73
+hId: 26/71
+hEd: 43/62
+hAd: 47/69
+hYd: 44/65
+had: 17/64
+hOd: 28/64
+hod: 48/66
+hUd: 39/71
+hud: 39/67
+hed: 33/70
+Set accuracy: 0.559299
+
+Training time: 0.316967 seconds
+
+Testing time: 0.001405 seconds
