@@ -33,13 +33,14 @@
 
 using namespace std;
 
-const double STOP_ERROR_VALUE  = 0.0000001;
+//const double STOP_ERROR_VALUE  = 0.01; //Iris
+const double STOP_ERROR_VALUE  = 0.004; //Vouls
 
 //const int NUM_HIDDEN_LAYERS    = 2;
 //const int NUM_NODES_IN_LAYER[] = {6, 4};
 
 const int NUM_HIDDEN_LAYERS    = 1;
-const int NUM_NODES_IN_LAYER[] = {12};
+const int NUM_NODES_IN_LAYER[] = {3};
 
 
 /*======================================================================
@@ -181,7 +182,7 @@ public:
          for (int i = 0; i < features.rows(); i++)
          {
             runInstanceTrough(features[i]);
-            error = backErrorPropigate(labels[i][0]);
+            error += backErrorPropigate(labels[i][0]);
          }
          error /= (double)features.rows();
          
@@ -190,13 +191,14 @@ public:
          else if (error < min)
             min = error;
          
-         ticCnt += error;
-         if (tic++ / 10 == 1)
-         {
-            cout << ticCnt / 10.0 << endl;
-            ticCnt = 0;
-            tic = 0;
-         }
+         cout << error << endl;
+//         ticCnt += error;
+//         if (tic++ / 10 == 1)
+//         {
+//            cout << ticCnt / 10.0 << endl;
+//            ticCnt = 0;
+//            tic = 0;
+//         }
          
          epic++;
          features.shuffleRows(m_rand, &labels);
@@ -264,7 +266,7 @@ public:
                                                                   n,
                                                                   *(nnLayers[l-1])
                                                                   );
-            errorFound += abs((*layer)[n]->errorValue);
+//            errorFound += abs((*layer)[n]->errorValue);
          }
       }
       
