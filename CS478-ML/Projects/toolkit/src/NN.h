@@ -33,15 +33,15 @@
 
 using namespace std;
 
-const double STOP_ERROR_VALUE  = 0.01; //Iris
-//const double STOP_ERROR_VALUE  = 0.004; //Vouls
+//const double STOP_ERROR_VALUE  = 0.01; //Iris
+const double STOP_ERROR_VALUE  = 0.004; //Vouls
 //const double STOP_ERROR_VALUE  = 0.09; //Vouls 2
 
 //const int NUM_HIDDEN_LAYERS    = 2;
 //const int NUM_NODES_IN_LAYER[] = {6, 4};
 
 const int NUM_HIDDEN_LAYERS    = 1;
-const int NUM_NODES_IN_LAYER[] = {3};
+const int NUM_NODES_IN_LAYER[] = {13};
 
 
 /*======================================================================
