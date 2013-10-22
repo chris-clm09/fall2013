@@ -107,6 +107,8 @@ public:
       setUpNuralNet(features, labels);
       printNN();
       
+//      cout   << "Rows: " << features.rows() << endl;
+      
       //Run NN Learning Algorithm
       learn(features, labels);
       
@@ -192,7 +194,7 @@ public:
          else if (error < min)
             min = error;
          
-         cout << error << endl;
+//         cout << error << endl;
 //         ticCnt += error;
 //         if (tic++ / 10 == 1)
 //         {
