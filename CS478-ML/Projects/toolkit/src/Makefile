@@ -114,9 +114,9 @@ clean : partialcleandbg partialcleanopt
 	rm -f $(DEPS_DBG)
 
 run:
-	./../bin/MLSystemManager -L nn -A ../data/iris.arff -E random .30 
+	./../bin/MLSystemManager -L nn -A ../data/iris.arff -E random .30 -N 
 
 run1: 
-	./../bin/MLSystemManager -L nn -A ../data/vowel2.arff -E random .25 
+	./../bin/MLSystemManager -L nn -A ../data/vowel2.arff -E random .25 -N
 
 .PHONY: clean partialcleandbg partialcleanopt dbg opt

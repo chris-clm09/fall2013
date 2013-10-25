@@ -16,6 +16,7 @@
 #include "NNNode.h"
 
 #include <iostream>
+#include <fstream>
 
 #define RESET       "\033[0m"
 #define BLACK       "\033[30m"      /* Black */
@@ -37,11 +38,11 @@ using namespace std;
 const double STOP_ERROR_VALUE  = 0.004; //Vouls
 //const double STOP_ERROR_VALUE  = 0.09; //Vouls 2
 
-//const int NUM_HIDDEN_LAYERS    = 2;
-//const int NUM_NODES_IN_LAYER[] = {6, 4};
+const int NUM_HIDDEN_LAYERS    = 2;
+const int NUM_NODES_IN_LAYER[] = {6, 4};
 
-const int NUM_HIDDEN_LAYERS    = 1;
-const int NUM_NODES_IN_LAYER[] = {13};
+//const int NUM_HIDDEN_LAYERS    = 1;
+//const int NUM_NODES_IN_LAYER[] = {13};
 
 
 /*======================================================================
@@ -172,6 +173,9 @@ public:
     ************************************************************************/
    void learn(Matrix &features, Matrix &labels)
    {
+      ofstream fout;
+      fout.open("junk.txt", ios::trunc);
+      
       double min = 0;
       
       int tic = 0;
@@ -194,7 +198,7 @@ public:
          else if (error < min)
             min = error;
          
-//         cout << error << endl;
+         fout << error << endl;
 //         ticCnt += error;
 //         if (tic++ / 10 == 1)
 //         {
