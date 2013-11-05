@@ -1,0 +1,37 @@
+% lenses dataset binarized for use in Association Rule learning
+ 
+@relation contact-lenses
+
+@attribute young			{0,1}
+@attribute pre-presbyopic	{0,1}
+@attribute presbyopic		{0,1}
+@attribute hypermetrope		{0,1}
+@attribute astigmatism		{0,1}
+@attribute norm-tearp-rate	{0,1}
+@attribute no-lenses		{0,1}
+
+@data
+1,0,0,0,0,0,1
+1,0,0,0,0,1,0
+1,0,0,0,1,0,1
+1,0,0,0,1,1,0
+1,0,0,1,0,0,1
+1,0,0,1,0,1,0
+1,0,0,1,1,0,1
+1,0,0,1,1,1,0
+0,1,0,0,0,0,1
+0,1,0,0,0,1,0
+0,1,0,0,1,0,1
+0,1,0,0,1,1,0
+0,1,0,1,0,0,1
+0,1,0,1,0,1,0
+0,1,0,1,1,0,1
+0,1,0,1,1,1,1
+0,0,1,0,0,0,1
+0,0,1,0,0,1,1
+0,0,1,0,1,0,1
+0,0,1,0,1,1,0
+0,0,1,1,0,0,1
+0,0,1,1,0,1,0
+0,0,1,1,1,0,1
+0,0,1,1,1,1,1
