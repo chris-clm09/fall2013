@@ -6,3 +6,5 @@ CS465-Security/Projects/.metadata/*
 .project
 .DS_Store
 *.o
+*.arff
+*.out
