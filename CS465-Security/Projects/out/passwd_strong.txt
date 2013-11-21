@@ -1,0 +1,3 @@
+lowerStrong:x:1006:1040:GECOS:dir:shell
+lowerAndUpperStrong:x:1007:1040:GECOS:dir:shell
+lunpStrong:x:1008:1040:GECOS:dir:shell

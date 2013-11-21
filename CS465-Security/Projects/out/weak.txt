@@ -1,0 +1,3 @@
+lowerweak:QyBHXheAZelUE:1000:1040:GECOS:dir:shell
+lowerAndUpperweak:JbpBqqCQjFAaY:1001:1040:GECOS:dir:shell
+lunpweak:F7mFcyNAna6lw:1002:1040:GECOS:dir:shell

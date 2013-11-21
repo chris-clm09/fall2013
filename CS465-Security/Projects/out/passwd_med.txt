@@ -1,0 +1,3 @@
+lowerMed:x:1003:1040:GECOS:dir:shell
+lowerAndUpperMed:x:1004:1040:GECOS:dir:shell
+lunpMed:x:1005:1040:GECOS:dir:shell
